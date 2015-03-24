@@ -6,7 +6,7 @@ body {
 #sidebar_container { position: absolute; left: 50%; }
 #sidebar                        { 
 	position: relative; left: -50%;
-	width: 18em; font-size: 0.825em; background-color: #333; border: 1px solid white; padding: 1em;  
+	width: 18em; background-color: #333; border: 1px solid white; padding: 1em;  
 }
 #sidebar h2                     { color: white; text-align: center; margin: 0; }
 #sidebar .settings              { line-height: 1.2em; height: 1.2em; text-align: right; }
@@ -18,31 +18,36 @@ body {
 #sidebar .description           { margin-bottom: 2em; }
 #sidebar .description b         { font-weight: normal; color: #FFF; }
 #sidebar .launch                { margin-top: 2em; }
-#sidebar .launch input          { width: 50% }
+#sidebar .launch input          { width: 50%; height: 2em; font-size: 1.2em; }
 
 #unsupported { border: 1px solid yellow; color: black; background-color: #FFFFAD; padding: 2em; margin: 1em; display: inline-block; }
 
 @media screen and (min-width: 0px) {
-  #sidebar_container { top: 120px; }
+  #sidebar_container { top: 100px; }
+  #sidebar .settings { display: none; }
   #game { width: 480px; height: 360px; }
 }
 
 @media screen and (min-width: 800px) {
-  #sidebar_container { top: 160px; }
+  #sidebar_container { top: 150px; }
+  #sidebar .settings { display: none; }
   #game { width: 640px; height: 480px; }
 }
 
 @media screen and (min-width: 1000px) {
-  #sidebar_container { top: 160px; }
+  #sidebar_container { top: 150px; }
+  #sidebar .settings { display: none; }
   #game { width: 640px; height: 480px; }
 }
 
 @media screen and (min-width: 1200px) {
-  #sidebar_container { top: 200px; }
+  #sidebar_container { top: 150px; }
+  #sidebar .settings { display: block; }
   #game { width: 800px; height: 600px; }
 }
 
 @media screen and (min-width: 1600px) {
   #sidebar_container { top: 256px; }
+  #sidebar .settings { display: block; }
   #game { width: 1024px; height: 768px; }
 }

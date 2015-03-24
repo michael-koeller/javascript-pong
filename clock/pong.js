@@ -128,21 +128,21 @@ Pong = {
 	var id = el.id;
 	switch (id) {
 		case 'btnGo': {
+			ev.preventDefault();
+			ev.stopPropagation();
 			// GO-button always triggers clock mode 
 			this.start(0);
-			ev.stopPropagation();
-			ev.preventDefault();
 			break;
 		}
 		case 'game': {
-			this.stop(true);
-			ev.stopPropagation();
 			ev.preventDefault();
+			ev.stopPropagation();
+			this.stop(true);
 		}
 	}
   },
 
-  onkeydown: function(keyCode) {
+  onkeydown: function(keyCode, ev) {
     switch(keyCode) {
       case Game.KEY.ZERO: this.start(0); break;
       case Game.KEY.ONE:  this.start(1); break;
@@ -155,13 +155,24 @@ Pong = {
     }
   },
 
-  onkeyup: function(keyCode) {
+  onkeyup: function(keyCode, ev) {
     switch(keyCode) {
       case Game.KEY.Q: if (!this.leftPaddle.auto)  this.leftPaddle.stopMovingUp();    break;
       case Game.KEY.A: if (!this.leftPaddle.auto)  this.leftPaddle.stopMovingDown();  break;
       case Game.KEY.P: if (!this.rightPaddle.auto) this.rightPaddle.stopMovingUp();   break;
       case Game.KEY.L: if (!this.rightPaddle.auto) this.rightPaddle.stopMovingDown(); break;
     }
+  },
+
+  ontouchstart: function(ev) {
+	if (this.playing) {
+		ev.preventDefault();
+		ev.stopPropagation();
+		this.stop(true);
+	}
+  },
+
+  ontouchend: function(ev) {
   },
 
   showStats:       function(on) { this.cfg.stats = on; },

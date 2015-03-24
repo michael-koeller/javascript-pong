@@ -188,12 +188,16 @@ Game = {
     addEvents: function() {
       Game.addEvent(document, 'click', this.onclick.bind(this));
       Game.addEvent(document, 'keydown', this.onkeydown.bind(this));
-      Game.addEvent(document, 'keyup',   this.onkeyup.bind(this));
+      Game.addEvent(document, 'keyup', this.onkeyup.bind(this));
+      Game.addEvent(document, 'touchstart', this.ontouchstart.bind(this));
+      Game.addEvent(document, 'touchend', this.ontouchend.bind(this));
     },
 
-    onclick:   function(ev) { if (this.game.onclick) this.game.onclick(ev.target, ev); },
-    onkeydown: function(ev) { if (this.game.onkeydown) this.game.onkeydown(ev.keyCode, ev); },
-    onkeyup:   function(ev) { if (this.game.onkeyup)   this.game.onkeyup(ev.keyCode, ev);   },
+    onclick:      function(ev) { if (this.game.onclick) this.game.onclick(ev.target, ev); },
+    onkeydown:    function(ev) { if (this.game.onkeydown) this.game.onkeydown(ev.keyCode, ev); },
+    onkeyup:      function(ev) { if (this.game.onkeyup) this.game.onkeyup(ev.keyCode, ev); },
+    ontouchstart: function(ev) { if (this.game.ontouchstart) this.game.ontouchstart(ev); },
+    ontouchend:   function(ev) { if (this.game.ontouchend) this.game.ontouchend(ev); },
 
     hideCursor: function() { this.canvas.style.cursor = 'none'; },
     showCursor: function() { this.canvas.style.cursor = 'auto'; },
