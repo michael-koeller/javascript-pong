@@ -5,15 +5,18 @@
 Pong = {
 
   Defaults: {
-    width:        640,   // logical canvas width (browser will scale to physical canvas size - which is controlled by @media css queries)
-    height:       480,   // logical canvas height (ditto)
-    wallWidth:    12,
-    paddleWidth:  12,
-    paddleHeight: 60,
-    paddleSpeed:  2,     // should be able to cross court vertically   in 2 seconds
-    ballSpeed:    4,     // should be able to cross court horizontally in 4 seconds, at starting speed ...
-    ballAccel:    1,     // ... but accelerate as time passes
-    ballRadius:   5
+    width:          640,   // logical canvas width (browser will scale to physical canvas size - which is controlled by @media css queries)
+    height:         480,   // logical canvas height (ditto)
+    wallWidth:      12,
+    paddleWidth:    12,
+    paddleHeight:   60,
+    paddleSpeed:    2,     // should be able to cross court vertically   in 2 seconds
+    ballSpeed:      4,     // should be able to cross court horizontally in 4 seconds, at starting speed ...
+    ballAccel:      2,     // ... but accelerate as time passes
+    ballRadius:     5,
+    ballSpinAdjust: 50,
+    aiReaction:     0.4,
+    aiErrorLevel:   60,
   },
 
   Colors: {
@@ -24,26 +27,6 @@ Pong = {
     predictionGuess: 'yellow',
     predictionExact: 'red'
   },
-
-  Levels: [
-    {aiReaction: 0.2, aiError:  40}, // 0:  ai is losing by 8
-    {aiReaction: 0.3, aiError:  50}, // 1:  ai is losing by 7
-    {aiReaction: 0.4, aiError:  60}, // 2:  ai is losing by 6
-    {aiReaction: 0.5, aiError:  70}, // 3:  ai is losing by 5
-    {aiReaction: 0.6, aiError:  80}, // 4:  ai is losing by 4
-    {aiReaction: 0.7, aiError:  90}, // 5:  ai is losing by 3
-    {aiReaction: 0.8, aiError: 100}, // 6:  ai is losing by 2
-    {aiReaction: 0.9, aiError: 110}, // 7:  ai is losing by 1
-    {aiReaction: 1.0, aiError: 120}, // 8:  tie
-    {aiReaction: 1.1, aiError: 130}, // 9:  ai is winning by 1
-    {aiReaction: 1.2, aiError: 140}, // 10: ai is winning by 2
-    {aiReaction: 1.3, aiError: 150}, // 11: ai is winning by 3
-    {aiReaction: 1.4, aiError: 160}, // 12: ai is winning by 4
-    {aiReaction: 1.5, aiError: 170}, // 13: ai is winning by 5
-    {aiReaction: 1.6, aiError: 180}, // 14: ai is winning by 6
-    {aiReaction: 1.7, aiError: 190}, // 15: ai is winning by 7
-    {aiReaction: 1.8, aiError: 200}  // 16: ai is winning by 8
-  ],
 
   //-----------------------------------------------------------------------------
 
@@ -66,12 +49,27 @@ Pong = {
 
   start: function(numPlayers) {
     if (!this.playing) {
-      this.scores = [0, 0];
       this.playing = true;
-      this.leftPaddle.setAuto(numPlayers < 1, this.level(0));
-      this.rightPaddle.setAuto(numPlayers < 2, this.level(1));
+      if (numPlayers < 1) {
+		this.leftPaddle.setAuto(true);
+		// clock mode
+		this.clockMode = true;
+		this.leftPaddle.setDropRate({m:true, h: false, d: false});
+		this.rightPaddle.setDropRate({m:false, h: true, d: false});
+	  }
+      if (numPlayers < 2) {
+		this.rightPaddle.setAuto(true);
+	  }
+		if (this.clockMode) {
+	      var now = new Date();
+	      this.scores = [now.getHours(), now.getMinutes()];
+		} else {
+			this.scores = [0, 0];
+		}
+	
       this.ball.reset();
       this.runner.hideCursor();
+      document.getElementById('sidebar').style.display = 'none';
     }
   },
 
@@ -82,25 +80,23 @@ Pong = {
         this.leftPaddle.setAuto(false);
         this.rightPaddle.setAuto(false);
         this.runner.showCursor();
+        document.getElementById('sidebar').style.display = 'block';
       }
     }
   },
 
-  level: function(playerNo) {
-    return 8 + (this.scores[playerNo] - this.scores[playerNo ? 0 : 1]);
-  },
-
   goal: function(playerNo) {
-    this.scores[playerNo] += 1;
-    if (this.scores[playerNo] == 9) {
-      this.menu.declareWinner(playerNo);
-      this.stop();
-    }
-    else {
-      this.ball.reset(playerNo);
-      this.leftPaddle.setLevel(this.level(0));
-      this.rightPaddle.setLevel(this.level(1));
-    }
+	if (this.clockMode) {
+		// set current time as score
+		var now = new Date();
+		this.scores = [now.getHours(), now.getMinutes()];
+		this.leftPaddle.forceDrop = false;
+		this.rightPaddle.forceDrop = false;
+	} else {
+		this.scores[playerNo] += 1;
+	}
+
+    this.ball.reset(playerNo);
   },
 
   update: function(dt) {
@@ -119,7 +115,7 @@ Pong = {
   },
 
   draw: function(ctx) {
-    this.court.draw(ctx, this.scores[0], this.scores[1]);
+    this.court.draw(ctx, this.scores);
     this.leftPaddle.draw(ctx);
     this.rightPaddle.draw(ctx);
     if (this.playing)
@@ -132,14 +128,18 @@ Pong = {
 	var id = el.id;
 	switch (id) {
 		case 'btnGo': {
-			var cb = document.getElementById('cbPlayers');
-			var players = cb.options[cb.selectedIndex].value;
-			this.start(players);
+			// GO-button always triggers clock mode 
+			this.start(0);
+			ev.stopPropagation();
+			ev.preventDefault();
 			break;
 		}
+		case 'game': {
+			this.stop(true);
+			ev.stopPropagation();
+			ev.preventDefault();
+		}
 	}
-	ev.stopPropagation();
-	ev.preventDefault();
   },
 
   onkeydown: function(keyCode) {
@@ -209,16 +209,20 @@ Pong = {
 
       var sw = 3*ww;
       var sh = 4*ww;
-      this.score1 = {x: 0.5 + (w/2) - 1.5*ww - sw, y: 2*ww, w: sw, h: sh};
-      this.score2 = {x: 0.5 + (w/2) + 1.5*ww,      y: 2*ww, w: sw, h: sh};
+      this.score1b = {x: 0.5 + (w/2) - 1.5*ww - sw, y: 2*ww, w: sw, h: sh};
+      this.score1a = {x: this.score1b.x - sh,       y: 2*ww, w: sw, h: sh};
+      this.score2a = {x: 0.5 + (w/2) + 1.5*ww,      y: 2*ww, w: sw, h: sh};
+      this.score2b = {x: this.score2a.x + sh,       y: 2*ww, w: sw, h: sh};
     },
 
-    draw: function(ctx, scorePlayer1, scorePlayer2) {
+    draw: function(ctx, scores) {
       ctx.fillStyle = Pong.Colors.walls;
       for(var n = 0 ; n < this.walls.length ; n++)
         ctx.fillRect(this.walls[n].x, this.walls[n].y, this.walls[n].width, this.walls[n].height);
-      this.drawDigit(ctx, scorePlayer1, this.score1);
-      this.drawDigit(ctx, scorePlayer2, this.score2);
+      this.drawDigit(ctx, Math.floor(scores[0] / 10), this.score1a);
+      this.drawDigit(ctx, scores[0] % 10            , this.score1b);
+      this.drawDigit(ctx, Math.floor(scores[1] / 10), this.score2a);
+      this.drawDigit(ctx, scores[1] % 10            , this.score2b);
     },
 
     drawDigit: function(ctx, n, box) {
@@ -271,6 +275,8 @@ Pong = {
       this.speed  = (this.maxY - this.minY) / pong.cfg.paddleSpeed;
       this.setpos(rhs ? pong.width - this.width : 0, this.minY + (this.maxY - this.minY)/2);
       this.setdir(0);
+      this.forceDrop = false;
+      this.dropped = false;
     },
 
 	setDropRate: function(rate) {
@@ -291,20 +297,14 @@ Pong = {
       this.down = (dy > 0 ?  dy : 0);
     },
 
-    setAuto: function(on, level) {
+    setAuto: function(on) {
       if (on && !this.auto) {
         this.auto = true;
-        this.setLevel(level);
       }
       else if (!on && this.auto) {
         this.auto = false;
         this.setdir(0);
       }
-    },
-
-    setLevel: function(level) {
-      if (this.auto)
-        this.level = Pong.Levels[level];
     },
 
     update: function(dt, ball) {
@@ -349,19 +349,43 @@ Pong = {
     },
 
     predict: function(ball, dt) {
-      // only re-predict if the ball changed direction, or its been some amount of time since last prediction
-      if (this.prediction &&
-          ((this.prediction.dx * ball.dx) > 0) &&
-          ((this.prediction.dy * ball.dy) > 0) &&
-          (this.prediction.since < this.level.aiReaction)) {
-        this.prediction.since += dt;
-        return;
-      }
+
+	if (this.pong.clockMode) {
+		var now = new Date();
+		if (!this.dropped) {
+			if (this.dropRate.m && now.getMinutes() > 0 && now.getSeconds() < 20) {
+				this.forceDrop = true;
+				this.dropped = true;
+				this.prediction = null;
+			}
+			if (this.dropRate.h && now.getMinutes() == 0) {
+				this.forceDrop = true;
+				this.dropped = true;
+				this.prediction = null;
+			}
+		}
+		if (now.getSeconds() > 20) {
+			this.dropped = false;
+		}
+	}
+
+    // only re-predict if the ball changed direction, or its been some amount of time since last prediction
+    if (this.prediction &&
+        ((this.prediction.dx * ball.dx) > 0) &&
+        ((this.prediction.dy * ball.dy) > 0) &&
+        (this.prediction.since < this.pong.cfg.aiReaction)) {
+      this.prediction.since += dt;
+      return;
+    }
 
       var pt  = Pong.Helper.ballIntercept(ball, {left: this.left, right: this.right, top: -10000, bottom: 10000}, ball.dx * 10, ball.dy * 10);
       if (pt) {
         var t = this.minY + ball.radius;
         var b = this.maxY + this.height - ball.radius;
+
+		if (this.forceDrop) {
+			pt.y += 2 * this.height;
+		}
 
         while ((pt.y < t) || (pt.y > b)) {
           if (pt.y < t) {
@@ -384,9 +408,11 @@ Pong = {
         this.prediction.radius = ball.radius;
         this.prediction.exactX = this.prediction.x;
         this.prediction.exactY = this.prediction.y;
-        var closeness = (ball.dx < 0 ? ball.x - this.right : this.left - ball.x) / this.pong.width;
-        var error = this.level.aiError * closeness;
-        this.prediction.y = this.prediction.y + Game.random(-error, error);
+		if (!this.forceDrop) {
+			var closeness = (ball.dx < 0 ? ball.x - this.right : this.left - ball.x) / this.pong.width;
+			var error = this.pong.cfg.aiErrorLevel * closeness;
+			this.prediction.y = this.prediction.y + Game.random(-error, error);
+		}
       }
     },
 
@@ -493,9 +519,9 @@ Pong = {
 
         // add/remove spin based on paddle direction
         if (paddle.up)
-          pos.dy = pos.dy * (pos.dy < 0 ? 0.5 : 1.5);
+          pos.dy -= this.pong.cfg.ballSpinAdjust;
         else if (paddle.down)
-          pos.dy = pos.dy * (pos.dy > 0 ? 0.5 : 1.5);
+          pos.dy += this.pong.cfg.ballSpinAdjust;
       }
 
       this.setpos(pos.x,  pos.y);
