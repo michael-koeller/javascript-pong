@@ -139,7 +139,7 @@ Pong = {
 		case 'game': {
 			ev.preventDefault();
 			ev.stopPropagation();
-			this.stop(true);
+			this.stop();
 		}
 	}
   },
