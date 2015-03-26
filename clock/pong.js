@@ -7,13 +7,15 @@ Pong = {
   Defaults: {
     width:          640,   // logical canvas width (browser will scale to physical canvas size - which is controlled by @media css queries)
     height:         480,   // logical canvas height (ditto)
-    wallWidth:      12,
-    paddleWidth:    12,
-    paddleHeight:   60,
+    wallWidth:      10,
+    digitWidth:     36,	
+    digitHeight:    48,
+    paddleWidth:    14,
+    paddleHeight:   90,
     paddleSpeed:    2,     // should be able to cross court vertically   in 2 seconds
-    ballSpeed:      4,     // should be able to cross court horizontally in 4 seconds, at starting speed ...
+    ballSpeed:      3,     // should be able to cross court horizontally in 4 seconds, at starting speed ...
     ballAccel:      2,     // ... but accelerate as time passes
-    ballRadius:     5,
+    ballRadius:     10,
     ballSpinAdjust: 50,
     aiReaction:     0.4,
     aiErrorLevel:   60,
@@ -165,11 +167,13 @@ Pong = {
   },
 
   ontouchstart: function(ev) {
+/*
 	if (this.playing) {
 		ev.preventDefault();
 		ev.stopPropagation();
 		this.stop(true);
 	}
+*/
   },
 
   ontouchend: function(ev) {
@@ -207,6 +211,7 @@ Pong = {
       var h  = pong.height;
       var ww = pong.cfg.wallWidth;
 
+      this.pong  = pong;
       this.ww    = ww;
       this.walls = [];
       this.walls.push({x: 0, y: 0,      width: w, height: ww});
@@ -218,12 +223,13 @@ Pong = {
                          width: ww, height: ww});
       }
 
-      var sw = 3*ww;
-      var sh = 4*ww;
-      this.score1b = {x: 0.5 + (w/2) - 1.5*ww - sw, y: 2*ww, w: sw, h: sh};
-      this.score1a = {x: this.score1b.x - sh,       y: 2*ww, w: sw, h: sh};
-      this.score2a = {x: 0.5 + (w/2) + 1.5*ww,      y: 2*ww, w: sw, h: sh};
-      this.score2b = {x: this.score2a.x + sh,       y: 2*ww, w: sw, h: sh};
+      var dw = pong.cfg.digitWidth;
+      var dh = pong.cfg.digitHeight;
+      var cx = w/2
+      this.score1b = {x: cx - 2*ww - dw,   y: 2*ww, w: dw, h: dh};
+      this.score1a = {x: cx - 3*ww - 2*dw, y: 2*ww, w: dw, h: dh};
+      this.score2a = {x: cx + 2*ww,        y: 2*ww, w: dw, h: dh};
+      this.score2b = {x: cx + 3*ww + dw,   y: 2*ww, w: dw, h: dh};
     },
 
     draw: function(ctx, scores) {
@@ -238,7 +244,8 @@ Pong = {
 
     drawDigit: function(ctx, n, box) {
       ctx.fillStyle = Pong.Colors.score;
-      var dw = dh = this.ww * 4/5;
+      var dw = this.pong.cfg.digitWidth / 3;
+      var dh = this.pong.cfg.digitHeight / 5;
       var blocks = Pong.Court.DIGITS[n];
       if (blocks[0])
         ctx.fillRect(box.x, 				box.y, 					box.w, 	dh);
@@ -541,7 +548,7 @@ Pong = {
     },
 
     draw: function(ctx) {
-      var w = h = this.radius * 2;
+      var w = h = 2* this.radius;
       ctx.fillStyle = Pong.Colors.ball;
       ctx.fillRect(this.x - this.radius, this.y - this.radius, w, h);
       if (this.pong.cfg.footprints) {

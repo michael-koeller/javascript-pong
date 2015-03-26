@@ -1,9 +1,9 @@
 body { 
 	text-align: center; position: relative;
-	background-color: black; color: #AAA; font-size: 12pt; padding: 1em 
+	background-color: black; color: #AAA; font-size: 12pt; padding: 30em 1em;
 }
 
-#sidebar_container { position: absolute; left: 50%; }
+#sidebar_container { position: absolute; left: 50%; padding-top: 30em; }
 #sidebar                        { 
 	position: relative; left: -50%;
 	width: 18em; background-color: #333; border: 1px solid white; padding: 1em;  
@@ -31,19 +31,19 @@ body {
 @media screen and (min-width: 800px) {
   #sidebar_container { top: 150px; }
   #sidebar .settings { display: none; }
-  #game { width: 640px; height: 480px; }
+  #game { width: 800px; height: 600px; }
 }
 
 @media screen and (min-width: 1000px) {
   #sidebar_container { top: 150px; }
   #sidebar .settings { display: none; }
-  #game { width: 640px; height: 480px; }
+  #game { width: 800px; height: 600px; }
 }
 
 @media screen and (min-width: 1200px) {
   #sidebar_container { top: 150px; }
   #sidebar .settings { display: block; }
-  #game { width: 800px; height: 600px; }
+  #game { width: 1024px; height: 768px; }
 }
 
 @media screen and (min-width: 1600px) {
